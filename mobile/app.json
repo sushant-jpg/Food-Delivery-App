@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "nepalgungdaba",
+    "slug": "nepalgungdaba",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "nepalgungdaba",
+    "userInterfaceStyle": "light",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow nepalgungdaba to use your location to find nearby restaurants and deliver accurately."
+        }
+      ]
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.nepalgungdaba.mobile"
+    },
+    "android": {
+      "package": "com.nepalgungdaba.mobile"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
