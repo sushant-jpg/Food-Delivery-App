@@ -1,11 +1,15 @@
 import axios from 'axios';
-
-const baseURL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:5000/api';
+import { apiBaseUrl } from './runtimeConfig';
 
 export const api = axios.create({
-  baseURL,
+  baseURL: apiBaseUrl || undefined,
   timeout: 15000,
   headers: { 'Content-Type': 'application/json' },
+});
+
+api.interceptors.request.use((config) => {
+  if (!apiBaseUrl) return Promise.reject(new Error('Set EXPO_PUBLIC_API_URL to your backend LAN address.'));
+  return config;
 });
 
 export const setApiToken = (token) => {
@@ -14,9 +18,9 @@ export const setApiToken = (token) => {
 };
 
 export const getApiErrorMessage = (error) => {
+  if (error.message?.startsWith('Set EXPO_PUBLIC_API_URL')) return error.message;
   if (error.response?.data?.message) return error.response.data.message;
   if (error.code === 'ECONNABORTED') return 'The request took too long. Please try again.';
   if (!error.response) return 'Cannot reach the server. Check your connection and API address.';
   return 'Something went wrong. Please try again.';
 };
-

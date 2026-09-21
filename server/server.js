@@ -1,4 +1,5 @@
 import http from 'node:http';
+import { once } from 'node:events';
 import { Server as SocketServer } from 'socket.io';
 import app from './src/app.js';
 import { connectDatabase, disconnectDatabase } from './src/config/database.js';
@@ -17,9 +18,10 @@ configureSockets(io);
 
 const start = async () => {
   await connectDatabase();
-  httpServer.listen(env.PORT, '0.0.0.0', () => {
-    console.log(`Nepalgungdaba API listening on http://0.0.0.0:${env.PORT}`);
-  });
+  httpServer.listen(env.PORT, '0.0.0.0');
+  // Wait for the listening event so bind errors reach the startup handler.
+  await once(httpServer, 'listening');
+  console.log(`Nepalgungdaba API listening on http://0.0.0.0:${env.PORT}`);
 };
 
 const shutdown = async (signal) => {
@@ -39,8 +41,15 @@ process.on('unhandledRejection', (error) => {
   shutdown('unhandledRejection');
 });
 
-start().catch((error) => {
-  console.error('Server failed to start:', error.message);
+start().catch(async (error) => {
+  if (error.code === 'EADDRINUSE') {
+    console.error(`Cannot start: port ${env.PORT} is already in use.`);
+    console.error('If NepalgunjDaba is already running in another terminal, keep using that instance.');
+    console.error('To restart it, press Ctrl+C in its terminal before running npm run dev:server again.');
+  } else {
+    console.error('Server failed to start:', error.message);
+  }
+  io.close();
+  await disconnectDatabase();
   process.exit(1);
 });
-

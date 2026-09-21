@@ -1,11 +1,12 @@
 import { io } from 'socket.io-client';
+import { socketBaseUrl } from './runtimeConfig';
 
-const socketUrl = process.env.EXPO_PUBLIC_SOCKET_URL || 'http://localhost:5000';
 let socket;
 
 export const connectSocket = (token) => {
+  if (!socketBaseUrl) return null;
   if (socket) socket.disconnect();
-  socket = io(socketUrl, { auth: { token }, transports: ['websocket'], autoConnect: true });
+  socket = io(socketBaseUrl, { auth: { token }, transports: ['websocket'], autoConnect: true });
   return socket;
 };
 
@@ -15,4 +16,3 @@ export const disconnectSocket = () => {
 };
 
 export const getSocket = () => socket;
-

@@ -2,7 +2,7 @@
 
 `nepalgungdaba` is a Nepalgunj-first, multi-role food-delivery platform built with an Expo mobile client and an Express/MongoDB API. It is designed around Nepal-specific delivery realities such as landmark-based addresses, uncertain street addressing, cash on delivery, restaurant approval, rider approval, and role-specific access.
 
-This repository currently completes the requested **Phase 1 through Phase 3 foundation**: project architecture, all core MongoDB schemas, and working authentication/authorization. Later business phases are deliberately represented by extensible models, not fake screens or static transactions.
+This repository now includes the production-style customer discovery slice through the cart foundation: project architecture, authentication/authorization, saved map-backed addresses, restaurant approval and management, menu management, nearby discovery, restaurant details, and a server-backed one-restaurant cart.
 
 ## Current capabilities
 
@@ -17,7 +17,12 @@ This repository currently completes the requested **Phase 1 through Phase 3 foun
 - Authenticated Socket.IO foundation with per-user and per-role rooms
 - Complete Mongoose model layer for users, addresses, restaurants, riders, menus, carts, orders, ratings, favorites, promotions, notifications, and platform settings
 - Nepalgunj core settings seed with configurable delivery pricing and service radius
-- Expo Go-compatible package selection, including location and maps for the upcoming location phase
+- Expo Go-compatible package selection, including location and maps
+- GPS permission handling, draggable/tappable map pins, and saved Nepalgunj addresses
+- Admin restaurant approval, rejection, suspension, and reactivation
+- Restaurant profile, opening-hours, location, category, and menu-item management
+- MongoDB geospatial nearby discovery with server-calculated distance and delivery fees
+- API-backed customer home, restaurant details, and one-restaurant cart conflict handling
 
 ## Architecture
 
@@ -136,6 +141,44 @@ Responses consistently use `{ success, message, data }`; validation failures als
 
 Password reset tokens are SHA-256 hashed in MongoDB and expire after 15 minutes. A production email/SMS provider should call the existing notification service boundary. For local testing only, setting `LOG_PASSWORD_RESET_TOKEN=true` exposes the token in the API response and server log; keep it false outside development.
 
+## Address, restaurant, menu, and cart APIs
+
+```text
+GET    /api/addresses
+POST   /api/addresses
+PATCH  /api/addresses/:id
+DELETE /api/addresses/:id
+PATCH  /api/addresses/:id/default
+
+GET    /api/restaurants/nearby?latitude=&longitude=&radius=
+GET    /api/restaurants/:id?latitude=&longitude=
+GET    /api/restaurants/me
+PATCH  /api/restaurants/me
+
+GET    /api/admin/restaurants?status=
+PATCH  /api/admin/restaurants/:id/approve
+PATCH  /api/admin/restaurants/:id/reject
+PATCH  /api/admin/restaurants/:id/suspend
+PATCH  /api/admin/restaurants/:id/reactivate
+
+GET    /api/menu
+POST   /api/menu/categories
+PATCH  /api/menu/categories/:id
+DELETE /api/menu/categories/:id
+POST   /api/menu/items
+PATCH  /api/menu/items/:id
+PATCH  /api/menu/items/:id/availability
+DELETE /api/menu/items/:id
+
+GET    /api/cart
+POST   /api/cart/items
+PATCH  /api/cart/items/:itemId
+DELETE /api/cart/items/:itemId
+DELETE /api/cart
+```
+
+All routes above are JWT protected and role restricted. Ownership comes from the authenticated user, never a client-supplied user or restaurant ID.
+
 ## Database design
 
 The model layer includes `User`, `CustomerProfile`, `Restaurant`, `Rider`, `Address`, `Category`, `MenuItem`, `Cart`, `Order`, `Review`, `Favorite`, `PromoCode`, `Notification`, and `PlatformSettings`.
@@ -183,9 +226,9 @@ npx expo export --platform android --output-dir dist
 
 ## Current limitations and next phases
 
-This milestone intentionally stops after Phase 3. MongoDB must be available to execute database-backed auth flows. Image upload, email/SMS delivery, admin approvals, saved addresses, nearby discovery, menus, cart, checkout, order transitions, rider assignment, live tracking, reviews, promotions, and the admin dashboard belong to Phases 4–15 and are not presented as completed.
+MongoDB must be available for database-backed flows. Checkout and order creation remain intentionally disabled until this foundation is exercised with real restaurant data. Binary image upload is not included; restaurant and menu images currently accept hosted URLs. Email/SMS delivery, order transitions, rider assignment, live tracking, reviews, and promotion redemption remain later phases.
 
-The next implementation slice should be Phase 4 (customer profile, coordinate-backed addresses, and the Nepalgunj map selector), followed by restaurant onboarding approval and menu management. The existing models and authorization boundaries are designed for that sequence.
+The home screen includes placeholders for offers and previous orders because checkout/history APIs are not part of this pass. Nearby, popular, and restaurant/menu content are API-backed rather than hard-coded.
 
 ## Product direction
 

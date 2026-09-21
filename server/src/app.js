@@ -5,6 +5,11 @@ import morgan from 'morgan';
 import { rateLimit } from 'express-rate-limit';
 import { env } from './config/env.js';
 import authRoutes from './routes/authRoutes.js';
+import addressRoutes from './routes/addressRoutes.js';
+import adminRestaurantRoutes from './routes/adminRestaurantRoutes.js';
+import cartRoutes from './routes/cartRoutes.js';
+import menuRoutes from './routes/menuRoutes.js';
+import restaurantRoutes from './routes/restaurantRoutes.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 import { sanitizeRequest } from './middleware/sanitize.js';
 import { sendSuccess } from './utils/apiResponse.js';
@@ -44,6 +49,11 @@ export const createApp = () => {
     }),
     authRoutes,
   );
+  app.use('/api/addresses', addressRoutes);
+  app.use('/api/restaurants', restaurantRoutes);
+  app.use('/api/admin/restaurants', adminRestaurantRoutes);
+  app.use('/api/menu', menuRoutes);
+  app.use('/api/cart', cartRoutes);
 
   app.use(notFound);
   app.use(errorHandler);
@@ -51,4 +61,3 @@ export const createApp = () => {
 };
 
 export default createApp();
-

@@ -1,4 +1,5 @@
 import { connectDatabase, disconnectDatabase } from '../config/database.js';
+import { DEFAULT_PLATFORM_SETTINGS } from '../config/serviceArea.js';
 import { PlatformSettings } from '../models/PlatformSettings.js';
 
 try {
@@ -7,17 +8,7 @@ try {
     { key: 'default' },
     {
       $setOnInsert: {
-        deliveryPricing: { baseFee: 40, perKmRate: 15, minimumFee: 40, maximumDistanceKm: 15 },
-        commissionPercentage: 15,
-        serviceAreas: [
-          {
-            name: 'Nepalgunj Central',
-            city: 'Nepalgunj',
-            active: true,
-            center: { latitude: 28.0507, longitude: 81.6167 },
-            radiusKm: 12,
-          },
-        ],
+        ...DEFAULT_PLATFORM_SETTINGS,
       },
     },
     { upsert: true, new: true, runValidators: true },
